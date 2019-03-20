@@ -8,9 +8,8 @@ if __name__ == "__main__":
     '''
    
    
-   
-   
-print(str('{0:02b}'.format(0)))
+abc = "abcdefghq"
+print(abc[1:3])
     
 
 
