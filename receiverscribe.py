@@ -12,11 +12,23 @@ else:
 
 wall = encoded_data.rfind(' ')
 wall2 = encoded_data.rfind(' ', 0, wall)
-checksum_passed = int(encoded_data[wall+1:],16)
-raw_data = encoded_data[0:wall2]
-hex_code = encoded_data[wall2+1:wall]
-int_code = int(hex_code,16)
-binary_code = str(bin(int_code)[2:])[1:]
+
+try:
+    checksum_passed = int(encoded_data[wall+1:],16)
+    raw_data = encoded_data[0:wall2]
+    hex_code = encoded_data[wall2+1:wall]
+    int_code = int(hex_code,16)
+    binary_code = str(bin(int_code)[2:])[1:]
+except ValueError as e:
+    if len(sys.argv) == 3:
+        file_o = open(sys.argv[2], 'w')
+        file_o.write("KO\nRaw data is untouched, but redundant data is corrupted")
+        file_o.close()
+        sys.exit()
+    else:
+        print("KO\nRaw data is untouched, but redundant data is corrupted")
+        sys.exit() 
+
 counter = 0
 location = -1
 checksum_calculated = 0
@@ -27,8 +39,6 @@ for character in raw_data:
         location = counter
     counter += 1
 
-file_o = open(sys.argv[2], 'w')
-
 if location != -1:
     corrected_character = chr(checksum_passed - checksum_calculated)
     result = "KO\n" + str(location) + " " + corrected_character
@@ -38,7 +48,7 @@ else:
     result = "OK"
 
 if len(sys.argv) == 3:
-    file_o = open(sys.argv, 'w')
+    file_o = open(sys.argv[2], 'w')
     file_o.write(result)
     file_o.close()
 else:
