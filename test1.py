@@ -8,8 +8,8 @@ if __name__ == "__main__":
     '''
    
    
-abc = "abcdefghq"
-print(abc[1:3])
+a = 14
+print(format(a,'x'))
     
 
 
