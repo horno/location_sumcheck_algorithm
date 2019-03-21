@@ -10,23 +10,23 @@ if len(sys.argv) == 3:
 else:
     encoded_data = input()
 
-wall = encoded_data.rfind(' ')
-wall2 = encoded_data.rfind(' ', 0, wall)
+wall_1 = encoded_data.rfind(' ')
+wall_2 = encoded_data.rfind(' ', 0, wall_1)
 
 try:
-    checksum_passed = int(encoded_data[wall+1:],16)
-    raw_data = encoded_data[0:wall2]
-    hex_code = encoded_data[wall2+1:wall]
+    checksum_passed = int(encoded_data[wall_1+1:],16)
+    raw_data = encoded_data[0:wall_2]
+    hex_code = encoded_data[wall_2+1:wall_1]
     int_code = int(hex_code,16)
     binary_code = str(bin(int_code)[2:])[1:]
 except ValueError as e:
     if len(sys.argv) == 3:
         file_o = open(sys.argv[2], 'w')
-        file_o.write("KO\nRaw data is untouched, but redundant data is corrupted")
+        file_o.write("KO")
         file_o.close()
         sys.exit()
     else:
-        print("KO\nRaw data is untouched, but redundant data is corrupted")
+        print("KO")
         sys.exit() 
 
 counter = 0
@@ -38,12 +38,14 @@ for character in raw_data:
         checksum_calculated -= ord(character)
         location = counter
     counter += 1
+for character in hex_code:
+    checksum_calculated += ord(character)
 
 if location != -1:
     corrected_character = chr(checksum_passed - checksum_calculated)
     result = "KO\n" + str(location) + " " + corrected_character
 elif checksum_passed != checksum_calculated:
-    result = "KO\nCan't locate the error"
+    result = "KO"
 else:
     result = "OK"
 
