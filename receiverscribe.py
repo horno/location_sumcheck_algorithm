@@ -1,57 +1,58 @@
 #!/usr/bin/env python3
-
+''' RECEIVERSCRIBE.PY '''
 import sys
 
 if len(sys.argv) == 3:
-    file_in = open(sys.argv[1], "r")
-    encoded_data = file_in.read()
-    encoded_data = encoded_data.rstrip("\n\r")
-    file_in.close()
+    FILE_IN = open(sys.argv[1], "r")
+    ENCODED_DATA = FILE_IN.read()
+    ENCODED_DATA = ENCODED_DATA.rstrip("\n\r")
+    FILE_IN.close()
 else:
-    encoded_data = input()
+    ENCODED_DATA = input()
 
-wall_1 = encoded_data.rfind(' ')
-wall_2 = encoded_data.rfind(' ', 0, wall_1)
+WALL_1 = ENCODED_DATA.rfind(' ')
+WALL_2 = ENCODED_DATA.rfind(' ', 0, WALL_1)
 
 try:
-    checksum_passed = int(encoded_data[wall_1+1:],16)
-    raw_data = encoded_data[0:wall_2]
-    hex_code = encoded_data[wall_2+1:wall_1]
-    int_code = int(hex_code,16)
-    binary_code = str(bin(int_code)[2:])[1:]
-except ValueError as e:
+    CHECKSUM_PASSED = int(ENCODED_DATA[WALL_1+1:], 16)
+    RAW_DATA = ENCODED_DATA[0:WALL_2]
+    HEX_CODE = ENCODED_DATA[WALL_2+1:WALL_1]
+    INT_CODE = int(HEX_CODE, 16)
+    BINARY_CODE = str(bin(INT_CODE)[2:])[1:]
+except ValueError as error:
     if len(sys.argv) == 3:
-        file_o = open(sys.argv[2], 'w')
-        file_o.write("KO")
-        file_o.close()
+        FILE_O = open(sys.argv[2], 'w')
+        FILE_O.write("KO")
+        FILE_O.close()
         sys.exit()
     else:
         print("KO")
-        sys.exit() 
+        sys.exit()
 
-counter = 0
-location = -1
-checksum_calculated = 0
-for character in raw_data:
-    checksum_calculated += ord(character)
-    if ord(character)%4 != int(binary_code[2*counter:2*counter+2],2):
-        checksum_calculated -= ord(character)
-        location = counter
-    counter += 1
-for character in hex_code:
-    checksum_calculated += ord(character)
+COUNTER = 0
+LOCATION = -1
+CHECKSUM_CALCULATED = 0
+for character in RAW_DATA:
+    CHECKSUM_CALCULATED += ord(character)
+    if ord(character)%4 != int(BINARY_CODE[2*COUNTER:2*COUNTER+2], 2):
+        CHECKSUM_CALCULATED -= ord(character)
+        LOCATION = COUNTER
+    COUNTER += 1
+for character in HEX_CODE:
+    CHECKSUM_CALCULATED += ord(character)
 
-if location != -1:
-    corrected_character = chr(checksum_passed - checksum_calculated)
-    result = "KO\n" + str(location) + " " + corrected_character
-elif checksum_passed != checksum_calculated:
-    result = "KO"
+if LOCATION != -1:
+    CORRECTED_CHARACTER = chr(CHECKSUM_PASSED - CHECKSUM_CALCULATED)
+    RESULT = "KO\n" + str(LOCATION) + " " + CORRECTED_CHARACTER
+elif CHECKSUM_PASSED != CHECKSUM_CALCULATED:
+    RESULT = "KO"
 else:
-    result = "OK"
+    RESULT = "OK"
 
 if len(sys.argv) == 3:
-    file_o = open(sys.argv[2], 'w')
-    file_o.write(result)
-    file_o.close()
+    FILE_O = open(sys.argv[2], 'w')
+    FILE_O.write(RESULT)
+    FILE_O.close()
 else:
-    print(result)
+    print(RESULT)
+    

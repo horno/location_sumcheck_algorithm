@@ -1,30 +1,30 @@
 #!/usr/bin/env python3
-
+''' SENDERSCRIBE '''
 import sys
 
 if len(sys.argv) == 3:
-    file_in = open(sys.argv[1], "r")
-    raw_data = file_in.read()
-    file_in.close()
+    FILE_IN = open(sys.argv[1], "r")
+    RAW_DATA = FILE_IN.read()
+    FILE_IN.close()
 else:
-    raw_data = input()
+    RAW_DATA = input()
 
-raw_data = raw_data.rstrip("\n\r")
-checksum = 0
-binary_cod = "1"
-for character in raw_data:
-    checksum += ord(character)
-    binary_cod += str('{0:02b}'.format(ord(character)%4))
+RAW_DATA = RAW_DATA.rstrip("\n\r")
+CHECKSUM = 0
+BINARY_CODE = "1"
+for character in RAW_DATA:
+    CHECKSUM += ord(character)
+    BINARY_CODE += str('{0:02b}'.format(ord(character)%4))
 
-hex_code = format(int(binary_cod,2),'x').upper()  # TODO:Es pot fer el parse directament?
-for character in hex_code:
-    checksum += ord(character)
+HEX_CODE = format(int(BINARY_CODE, 2), 'x').upper()
+for character in HEX_CODE:
+    CHECKSUM += ord(character)
 
 
-encoded_data = raw_data + " " + hex_code + " " + str(format(checksum,'x')).upper()
-if len(sys.argv) == 3: # TODO: Considerar ficar en una funció auxiliar o usar un booleà
-    file_out = open(sys.argv[2], "w")
-    file_out.write(encoded_data)
-    file_out.close()
+ENCODED_DATA = RAW_DATA + " " + HEX_CODE + " " + str(format(CHECKSUM, 'x')).upper()
+if len(sys.argv) == 3:
+    FILE_OUT = open(sys.argv[2], "w")
+    FILE_OUT.write(ENCODED_DATA)
+    FILE_OUT.close()
 else:
-    print(encoded_data)
+    print(ENCODED_DATA)
