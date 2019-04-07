@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-''' RECEIVERSCRIBE.PY '''
+''' RECEIVERSCRIBE RECURSIVE '''
 import sys
 
 
@@ -22,14 +22,7 @@ def decoded_output(result):
         print(result)
 
 if __name__ == "__main__":
-    '''if len(sys.argv) == 3:
-        FILE_IN = open(sys.argv[1], "r")
-        ENCODED_DATA = FILE_IN.read()
-        ENCODED_DATA = ENCODED_DATA.rstrip("\n\r")
-        FILE_IN.close()
-    else:
-        ENCODED_DATA = input()'''
-    
+
     ENCODED_DATA = encoded_iput()
 
     WALL_1 = ENCODED_DATA.rfind(' ')
@@ -70,12 +63,6 @@ if __name__ == "__main__":
         RESULT = "KO"
     else:
         RESULT = "OK"
-
-    '''if len(sys.argv) == 3:
-        FILE_O = open(sys.argv[2], 'w')
-        FILE_O.write(RESULT)
-        FILE_O.close()
-    else:
-        print(RESULT)'''
+        
     decoded_output(RESULT)
         

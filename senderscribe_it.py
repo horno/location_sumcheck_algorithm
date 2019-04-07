@@ -1,16 +1,27 @@
 #!/usr/bin/env python3
-''' SENDERSCRIBE '''
+''' SENDERSCRIBE ITERATIVE '''
 import sys
 
+def raw_iput():
+    if len(sys.argv) == 3:
+        FILE_IN = open(sys.argv[1], "r")
+        FILE_IN.close()        
+        return FILE_IN.read()
+    else:
+        return input()
+
+def encoded_output(encoded_data):
+    if len(sys.argv) == 3:
+        FILE_OUT = open(sys.argv[2], "w")
+        FILE_OUT.write(encoded_data)
+        FILE_OUT.close()
+    else:
+        print(encoded_data)
 
 
 if __name__ =="__main__":
-    if len(sys.argv) == 3:
-        FILE_IN = open(sys.argv[1], "r")
-        RAW_DATA = FILE_IN.read()
-        FILE_IN.close()
-    else:
-        RAW_DATA = input()
+
+    RAW_DATA = raw_iput()
 
     RAW_DATA = RAW_DATA.rstrip("\n\r")
     CHECKSUM = 0
@@ -25,9 +36,5 @@ if __name__ =="__main__":
 
 
     ENCODED_DATA = RAW_DATA + " " + HEX_CODE + " " + str(format(CHECKSUM, 'x')).upper()
-    if len(sys.argv) == 3:
-        FILE_OUT = open(sys.argv[2], "w")
-        FILE_OUT.write(ENCODED_DATA)
-        FILE_OUT.close()
-    else:
-        print(ENCODED_DATA)
+    
+    encoded_output(ENCODED_DATA)
