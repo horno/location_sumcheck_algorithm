@@ -27,12 +27,12 @@ def encode_pieces(raw_data, checksum, binary_code):
         binary_code += str('{0:02b}'.format(ord(character)%4))
         return encode_pieces(raw_data[1:],checksum,binary_code)
 
-def sum_encoded(hex_code, checksum):
+def checksum_code(hex_code, checksum):
     if len(hex_code) == 0:
         return checksum
     else:
         checksum += ord(hex_code[0])
-        return sum_encoded(hex_code[1:], checksum)
+        return checksum_code(hex_code[1:], checksum)
 
 
 if __name__ =="__main__":
@@ -44,7 +44,7 @@ if __name__ =="__main__":
     BINARY_CODE = "1"
     [], CHECKSUM, BINARY_CODE = encode_pieces(RAW_DATA, CHECKSUM, BINARY_CODE)
     HEX_CODE = format(int(BINARY_CODE, 2), 'x').upper()
-    CHECKSUM = sum_encoded(HEX_CODE, CHECKSUM)
+    CHECKSUM = checksum_code(HEX_CODE, CHECKSUM)
 
     ENCODED_DATA = RAW_DATA + " " + HEX_CODE + " " + str(format(CHECKSUM, 'x')).upper()
     
