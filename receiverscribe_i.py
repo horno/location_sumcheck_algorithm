@@ -2,22 +2,21 @@
 ''' RECEIVERSCRIBE ITERATIVE '''
 import sys
 
-
-
 def encoded_iput():
+    ''' input from file or stdin '''
     if len(sys.argv) == 3:
-        FILE_IN = open(sys.argv[1], "r")
-        ENCODED_DATA = FILE_IN.read()
-        FILE_IN.close()
-        return ENCODED_DATA.rstrip("\n\r")
-    else:
-        return input()
+        file_in = open(sys.argv[1], "r")
+        encoded_data = file_in.read()
+        file_in.close()
+        return encoded_data.rstrip("\n\r")
+    return input()
 
 def decoded_output(result):
+    ''' output to file or stdout '''
     if len(sys.argv) == 3:
-        FILE_O = open(sys.argv[2], 'w')
-        FILE_O.write(result)
-        FILE_O.close()
+        file_out = open(sys.argv[2], 'w')
+        file_out.write(result)
+        file_out.close()
     else:
         print(result)
 
@@ -63,6 +62,6 @@ if __name__ == "__main__":
         RESULT = "KO"
     else:
         RESULT = "OK"
-        
+
     decoded_output(RESULT)
         
