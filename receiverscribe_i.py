@@ -2,7 +2,7 @@
 ''' RECEIVERSCRIBE ITERATIVE '''
 import sys
 
-def encoded_iput():
+def encoded_input():
     ''' input from file or stdin '''
     if len(sys.argv) == 3:
         file_in = open(sys.argv[1], "r")
@@ -22,7 +22,7 @@ def decoded_output(result):
 
 if __name__ == "__main__":
 
-    ENCODED_DATA = encoded_iput()
+    ENCODED_DATA = encoded_input()
 
     WALL_1 = ENCODED_DATA.rfind(' ')
     WALL_2 = ENCODED_DATA.rfind(' ', 0, WALL_1)

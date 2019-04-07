@@ -57,19 +57,265 @@
 
 \section{Senderscribe}
 \subsection{Disseny recursiu}
+\begin{lstlisting}
+''' SENDERSCRIBE RECURSIVE '''
+FUNCTION raw_input():
+    ''' input from file OR stdin '''
+    IF len(sys.argv) = 3:
+        file_in <- open(sys.argv[1], "r")
+        file_in.close()
+        RETURN file_in.read()
+    ENDIF
+    RETURN input()
+ENDFUNCTION
+
+FUNCTION encoded_output(encoded_data):
+    ''' output to file OR stdout '''
+    IF len(sys.argv) = 3:
+        file_out <- open(sys.argv[2], "w")
+        file_out.write(encoded_data)
+        file_out.close()
+    ELSE:
+        OUTPUT encoded_data
+    ENDIF
+ENDFUNCTION
+
+FUNCTION encode_pieces(raw_data, checksum, binary_code):
+    ''' encode to binary the data AND does the checksum for raw_data '''
+    IF raw_data is empty:
+        RETURN raw_data, checksum, binary_code
+    ENDIF
+    character <- raw_data[0]
+    checksum += ord(character)
+    binary_code += str('{0:02b}'.format(ord(character)%4))
+    RETURN encode_pieces(raw_data[1:], checksum, binary_code)
+ENDFUNCTION
+
+FUNCTION checksum_code(hex_code, checksum):
+    ''' does the checksum for the hexadecimal encoded part '''
+    IF hex_code is empty:
+        RETURN checksum
+    ENDIF
+    checksum += ord(hex_code[0])
+    RETURN checksum_code(hex_code[1:], checksum)
+ENDFUNCTION
+
+MAIN:
+    RAW_DATA <- raw_input()
+    RAW_DATA <- RAW_DATA.rstrip("\n\r")
+    CHECKSUM <- 0
+    BINARY_CODE <- "1"
+    [], CHECKSUM, BINARY_CODE <- encode_pieces(RAW_DATA, CHECKSUM, BINARY_CODE)
+    HEX_CODE <- format(int(BINARY_CODE, 2), 'x').upper()
+    CHECKSUM <- checksum_code(HEX_CODE, CHECKSUM)
+    ENCODED_DATA <- RAW_DATA + " " + HEX_CODE + " " + 
+                    + str(format(CHECKSUM, 'x')).upper()
+    encoded_output(ENCODED_DATA)
+ENDMAIN
+\end{lstlisting}
 \newpage
 \subsection{Disseny iteratiu}
 \begin{lstlisting}
+''' SENDERSCRIBE ITERATIVE '''
+FUNCTION raw_input():
+    ''' input from file OR stdin '''
+    IF len(sys.argv) = 3:
+        file_in <- open(sys.argv[1], "r")
+        file_in.close()
+        RETURN file_in.read()
+    ENDIF
+    RETURN input()
+ENDFUNCTION
 
+FUNCTION encoded_output(encoded_data):
+    ''' output to file OR stdout '''
+    IF len(sys.argv) = 3:
+        file_out <- open(sys.argv[2], "w")
+        file_out.write(encoded_data)
+        file_out.close()
+    ELSE:
+        OUTPUT encoded_data
+    ENDIF
+ENDFUNCTION
+
+MAIN:
+    RAW_DATA <- raw_input()
+    RAW_DATA <- RAW_DATA.rstrip("\n\r")
+    CHECKSUM <- 0
+    BINARY_CODE <- "1"
+    for character in RAW_DATA:
+        CHECKSUM += ord(character)
+        BINARY_CODE += str('{0:02b}'.format(ord(character)%4))
+    ENDFOR
+    HEX_CODE <- format(int(BINARY_CODE, 2), 'x').upper()
+    for character in HEX_CODE:
+        CHECKSUM += ord(character)
+    ENDFOR
+    ENCODED_DATA <- RAW_DATA + " " + HEX_CODE + " " + 
+				+ str(format(CHECKSUM, 'x')).upper()
+    encoded_output(ENCODED_DATA)
+ENDMAIN
 \end{lstlisting}
-
-
 \subsection{Cost teòric}
 \subsection{Cost experimental}
 
 \section{Receiverscribe}
 \subsection{Disseny recursiu}
+\begin{lstlisting}
+''' RECEIVERSCRIBE RECURSIVE '''
+FUNCTION encoded_input():
+    ''' input from file or stdin '''
+    IF len(sys.argv) = 3:
+        file_in <- open(sys.argv[1], "r")
+        encoded_data <- file_in.read()
+        file_in.close()
+        RETURN encoded_data.rstrip("\n\r")
+    ENDIF
+    RETURN input()
+ENDFUNCTION
+
+FUNCTION decoded_output(result):
+    ''' output to file or stdout '''
+    IF len(sys.argv) = 3:
+        file_out <- open(sys.argv[2], 'w')
+        file_out.write(result)
+        file_out.close()
+    ELSE:
+        OUTPUT result
+    ENDIF
+ENDFUNCTION
+
+FUNCTION checksum_code(hex_code, checksum):
+    ''' checksum of the hex_code part '''
+    IF hex_code is empty:
+        RETURN checksum
+    ENDIF
+    checksum += ord(hex_code[0])
+    RETURN checksum_code(hex_code[1:], checksum)
+ENDFUNCTION
+
+FUNCTION scan_data(raw_data, checksum_calculated, binary_code, counter, location):
+    ''' converts AND scans the data in order to detect an error AND its location '''
+    IF raw_data is empty:
+        RETURN checksum_calculated, location
+    ENDIF
+    character <- raw_data[0]
+    checksum_calculated += ord(character)
+    IF ord(character)%4 != int(binary_code[2*counter:2*counter+2], 2):
+        checksum_calculated -= ord(character)
+        location <- counter
+    ENDIF
+    RETURN scan_data(raw_data[1:], checksum_calculated, binary_code,
+                     counter+1, location)
+ENDFUNCTION
+
+IF __name__ = "__main__":
+    ENCODED_DATA <- encoded_input()
+    WALL_1 <- ENCODED_DATA.rfind(' ')
+    WALL_2 <- ENCODED_DATA.rfind(' ', 0, WALL_1)
+    try:
+        CHECKSUM_PASSED <- int(ENCODED_DATA[WALL_1+1:], 16)
+        RAW_DATA <- ENCODED_DATA[0:WALL_2]
+        HEX_CODE <- ENCODED_DATA[WALL_2+1:WALL_1]
+        INT_CODE <- int(HEX_CODE, 16)
+        BINARY_CODE <- str(bin(INT_CODE)[2:])[1:]
+    except ValueError as error:
+        IF len(sys.argv) = 3:
+            FILE_O <- open(sys.argv[2], 'w')
+            FILE_O.write("KO")
+            FILE_O.close()
+            sys.exit()
+        ELSE:
+            OUTPUT "KO"
+            sys.exit()
+        ENDIF
+    COUNTER <- 0
+    LOCATION <- -1
+    CHECKSUM_CALCULATED <- 0
+    CHECKSUM_CALCULATED, LOCATION <- scan_data(RAW_DATA, CHECKSUM_CALCULATED,
+                                              BINARY_CODE, COUNTER, LOCATION)
+    CHECKSUM_CALCULATED <- checksum_code(HEX_CODE, CHECKSUM_CALCULATED)
+    IF LOCATION != -1:
+        CORRECTED_CHARACTER <- chr(CHECKSUM_PASSED - CHECKSUM_CALCULATED)
+        RESULT <- "KO\n" + str(LOCATION) + " " + CORRECTED_CHARACTER
+    ELSEIF CHECKSUM_PASSED != CHECKSUM_CALCULATED:
+        RESULT <- "KO"
+    ELSE:
+        RESULT <- "OK"
+    ENDIF
+    decoded_output(RESULT)
+\end{lstlisting}
+\newpage
 \subsection{Disseny iteratiu}
+\begin{lstlisting}
+''' RECEIVERSCRIBE ITERATIVE '''
+FUNCTION encoded_input():
+    ''' input from file OR stdin '''
+    IF len(sys.argv) = 3:
+        file_in <- open(sys.argv[1], "r")
+        encoded_data <- file_in.read()
+        file_in.close()
+        RETURN encoded_data.rstrip("\n\r")
+    ENDIF
+    RETURN input()
+ENDFUNCTION
+
+FUNCTION decoded_output(result):
+    ''' output to file OR stdout '''
+    IF len(sys.argv) = 3:
+        file_out <- open(sys.argv[2], 'w')
+        file_out.write(result)
+        file_out.close()
+    ELSE:
+        OUTPUT result
+    ENDIF
+ENDFUNCTION
+
+MAIN:
+    ENCODED_DATA <- encoded_input()
+    WALL_1 <- ENCODED_DATA.rfind(' ')
+    WALL_2 <- ENCODED_DATA.rfind(' ', 0, WALL_1)
+    try:
+        CHECKSUM_PASSED <- int(ENCODED_DATA[WALL_1+1:], 16)
+        RAW_DATA <- ENCODED_DATA[0:WALL_2]
+        HEX_CODE <- ENCODED_DATA[WALL_2+1:WALL_1]
+        INT_CODE <- int(HEX_CODE, 16)
+        BINARY_CODE <- str(bin(INT_CODE)[2:])[1:]
+    except ValueError as error:
+        IF len(sys.argv) = 3:
+            FILE_O <- open(sys.argv[2], 'w')
+            FILE_O.write("KO")
+            FILE_O.close()
+            sys.exit()
+        ELSE:
+            OUTPUT "KO"
+            sys.exit()
+        ENDIF
+    COUNTER <- 0
+    LOCATION <- -1
+    CHECKSUM_CALCULATED <- 0
+    for character in RAW_DATA:
+        CHECKSUM_CALCULATED += ord(character)
+        IF ord(character)%4 != int(BINARY_CODE[2*COUNTER:2*COUNTER+2], 2):
+            CHECKSUM_CALCULATED -= ord(character)
+            LOCATION <- COUNTER
+        ENDIF
+        COUNTER += 1
+    ENDFOR
+    for character in HEX_CODE:
+        CHECKSUM_CALCULATED += ord(character)
+    ENDFOR
+    IF LOCATION != -1:
+        CORRECTED_CHARACTER <- chr(CHECKSUM_PASSED - CHECKSUM_CALCULATED)
+        RESULT <- "KO\n" + str(LOCATION) + " " + CORRECTED_CHARACTER
+    ELSEIF CHECKSUM_PASSED != CHECKSUM_CALCULATED:
+        RESULT <- "KO"
+    ELSE:
+        RESULT <- "OK"
+    ENDIF
+    decoded_output(RESULT)
+ENDMAIN
+\end{lstlisting}
 \subsection{Cost teòric}
 \subsection{Cost experimental}
 

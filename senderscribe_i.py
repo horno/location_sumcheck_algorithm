@@ -2,7 +2,7 @@
 ''' SENDERSCRIBE ITERATIVE '''
 import sys
 
-def raw_iput():
+def raw_input():
     ''' input from file or stdin '''
     if len(sys.argv) == 3:
         file_in = open(sys.argv[1], "r")
@@ -21,7 +21,7 @@ def encoded_output(encoded_data):
 
 if __name__ == "__main__":
 
-    RAW_DATA = raw_iput()
+    RAW_DATA = raw_input()
 
     RAW_DATA = RAW_DATA.rstrip("\n\r")
     CHECKSUM = 0

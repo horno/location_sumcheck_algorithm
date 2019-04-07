@@ -2,7 +2,7 @@
 ''' RECEIVERSCRIBE RECURSIVE '''
 import sys
 
-def encoded_iput():
+def encoded_input():
     ''' input from file or stdin '''
     if len(sys.argv) == 3:
         file_in = open(sys.argv[1], "r")
@@ -12,7 +12,7 @@ def encoded_iput():
     return input()
 
 def decoded_output(result):
-    ''' putput to file or stdout '''
+    ''' output to file or stdout '''
     if len(sys.argv) == 3:
         file_out = open(sys.argv[2], 'w')
         file_out.write(result)
@@ -41,7 +41,7 @@ def scan_data(raw_data, checksum_calculated, binary_code, counter, location):
 
 if __name__ == "__main__":
 
-    ENCODED_DATA = encoded_iput()
+    ENCODED_DATA = encoded_input()
 
     WALL_1 = ENCODED_DATA.rfind(' ')
     WALL_2 = ENCODED_DATA.rfind(' ', 0, WALL_1)
