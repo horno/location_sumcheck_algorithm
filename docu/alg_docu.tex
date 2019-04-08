@@ -37,11 +37,11 @@
                            text centered}
 }
 \renewcommand{\figurename}{Figura}
-\title{Laboratori 5}
-\author{Sergi Sales Jové, Sergi Simón Balcells}
-\date{Dimarts 19 de Novembre}
-\assignatura{Estructures de dades}
-\professorat{X. Domingo, J.E. Garrido, JM. Gimeno}
+\title{Pràctica 1}
+\author{Ian Palacín Aliana}
+\date{Dissabte 07 d'Abril}
+\assignatura{Algorítmica i complexitat}
+\professorat{Jordi Planes Cid, Aitor Corchero Rodríguez}
 \grup{GM3}
 
 %Comença el document
@@ -56,6 +56,15 @@
 \pagenumbering{arabic}
 
 \section{Senderscribe}
+L'algoritme de senderscribe, una vegada agafades les dades de
+terminal o mitjançant un fitxer, el que fa és fer un pseudo-CRC,
+és a dir, fa la operació mòdul 4 al codi asci de cada caràcter
+de les dades. Cada mòdul el passa a binari, i de la concatenació
+de mòduls en binari ho converteix a hexadecimal. Una vegada obtingut
+l'hexadecimal, fa una suma de validació al text original més la clau
+hexadecimal obtinguda, que també la passa a hexadecimal. Una vegada
+obtingudes les dos claus, les concatena a les dades separant-ho
+amb espais. Això és el que envia a la sortida.  
 \subsection{Disseny recursiu}
 \begin{lstlisting}
 ''' SENDERSCRIBE RECURSIVE '''
@@ -156,10 +165,64 @@ MAIN:
     encoded_output(ENCODED_DATA)
 ENDMAIN
 \end{lstlisting}
-\subsection{Cost teòric}
-\subsection{Cost experimental}
+\newpage
+\subsection{Cost teòric recursiu}
+L'algoritme recursiu de senderscribe té dos funcions recursives i 0 bucles.
+Podem dir que \textbf{n} és la llargada de l'string raw\textunderscore data, 
+i que \textbf{cx} és el cost de la línia de codi x. Donades aquestes 
+condicions tenim que:\\
+\textbf{c1*(n-1) + c2*(n-1) + c3*1 + c4*(n-1) + c5*(n-1) + c6*(n-1) + c7*(n-1)}
+\begin{lstlisting}
+1 def encode_pieces(raw_data, checksum, binary_code):
+2     if not raw_data:
+3          return raw_data, checksum, binary_code
+4     character = raw_data[0]
+5     checksum += ord(character)
+6     binary_code += str('{0:02b}'.format(ord(character)%4))
+7     return encode_pieces(raw_data[1:], checksum, binary_code)
+\end{lstlisting}
+I pel segon bucle, on \textbf{n} és la llargada de hex\textunderscore code:\\
+\textbf{c1*(n-1) + c2*(n-1) + c3*1 + c4*(n-1) + c5*(n-1)}
+\begin{lstlisting}
+1 def checksum_code(hex_code, checksum):
+2     if not hex_code:
+3         return checksum
+4     checksum += ord(hex_code[0])
+5     return checksum_code(hex_code[1:], checksum)
+\end{lstlisting}
+Dont de que cada funció es crida des del main una única vegada, que no
+hi ha cap bucle, i que el cost de les crides \textbf{cx} són inferiors
+a O(n), tenim que el cost de la part recursiva de senderscribe pertany
+a \textbf{O(n)}
+\subsection{Cost teòric iteratiu}
+L'algoritme de senderscribe iteratiu consta de 2 bucles, tenim que
+pel primer bucle, el cost teòric seria:\\
+\textbf{c1*(n+1) + c2*n + c3*n}
+\begin{lstlisting}
+1 for character in RAW_DATA:
+2        CHECKSUM += ord(character)
+3        BINARY_CODE += str('{0:02b}'.format(ord(character)%4))
+\end{lstlisting}
+En segon lloc, pel següent bucle, seria: \\
+\textbf{c1*(n+1) + c2*n}
+\begin{lstlisting}
+1    for character in HEX_CODE:
+2        CHECKSUM += ord(character)
+\end{lstlisting}
+Assumint que les operacions \textbf{cx} (c1,c2,...) tenen un 
+cost inferior a O(n), el primer bucle pertany a \textbf{O(n)}, 
+al igual que el segon, fent així que el cost de senderscribe 
+iteratiu sigui d'\textbf{O(n)}
 
+\subsection{Cost experimental}
+Per raons de problemes amb la llibreria matplotlib a última hora,
+no he pogut col·locar els gràfics amb els temps dels 
+costos experimentals.
+\newpage
 \section{Receiverscribe}
+Receiverscribe torna a convertir les dades obtingudes a les claus 
+parlades anteriorment, i tornant a fer el mòdul pot saber si hi ha hagut
+un error i on.
 \subsection{Disseny recursiu}
 \begin{lstlisting}
 ''' RECEIVERSCRIBE RECURSIVE '''
@@ -316,7 +379,56 @@ MAIN:
     decoded_output(RESULT)
 ENDMAIN
 \end{lstlisting}
-\subsection{Cost teòric}
-\subsection{Cost experimental}
+\newpage
+\subsection{Cost teòric recursiu}
+En la part recursiva de reciverscribe tenim:\\
+\textbf{c1*(n-1) + c2*(n-1) + c3*1 + c4*(n-1) + c5*(n-1)}
+\begin{lstlisting}
+1 def checksum_code(hex_code, checksum):
+2      if not hex_code:
+3         return checksum
+4     checksum += ord(hex_code[0])
+5     return checksum_code(hex_code[1:], checksum)
+\end{lstlisting}
+I pel segon bucle:\\
+\textbf{c1*(n-1) + c2*(n-1) + c3*1 + c4*(n-1) + c5*(n-1) + c6*(n-1) +
+c7*1 + c8*1 + c9*(n-1)}
+\begin{lstlisting}
+1 def scan_data(raw_data, checksum_calculated, binary_code, counter, location):
+2     if not raw_data:
+3         return checksum_calculated, location
+4     character = raw_data[0]
+5     checksum_calculated += ord(character)
+6     if ord(character)%4 != int(binary_code[2*counter:2*counter+2], 2):
+7         checksum_calculated -= ord(character)
+8         location = counter
+9     return scan_data(raw_data[1:], checksum_calculated, binary_code,
+                     counter+1, location)
+\end{lstlisting}
+De la mateixa manera que en la part recursiva de l'apartat anterior,
+com que les funcions només es criden una única vegada des del main,
+el cost serà, de nou, \textbf{O(n)}
+\subsection{Cost teòric iteratiu}
+En la part iterativa del receiverscribe tenim també dos bucles.
+Donades les condicions establertes en la part iterativa de 
+l'apartat anterior on tenim que:\\
+\textbf{c1*(n+1) + c2*n + c3*n + c4*1 + c5*1 * c6*n}
+\begin{lstlisting}
+1 for character in RAW_DATA:
+2         CHECKSUM_CALCULATED += ord(character)
+3         if ord(character)%4 != int(BINARY_CODE[2*COUNTER:2*COUNTER+2], 2):
+4             CHECKSUM_CALCULATED -= ord(character)
+5             LOCATION = COUNTER
+6         COUNTER += 1
+\end{lstlisting}
+I pel segon bucle:\\
+\textbf{c1*(n+1) + c2*n}
+\begin{lstlisting}
+1    for character in HEX_CODE:
+2        CHECKSUM_CALCULATED += ord(character)
+\end{lstlisting}
+De igual forma que en la part de senderscribe, assumint que el cost 
+de \textbf{cx} és inferior a O(n), tenim que la part iterativa de 
+receiverscribe pertan a \textbf{O(n)}
 
 \end{document}

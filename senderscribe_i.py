@@ -20,7 +20,7 @@ def encoded_output(encoded_data):
         print(encoded_data)
 
 if __name__ == "__main__":
-
+    
     RAW_DATA = raw_input()
 
     RAW_DATA = RAW_DATA.rstrip("\n\r")
